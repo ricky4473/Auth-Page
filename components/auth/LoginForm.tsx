@@ -1,10 +1,10 @@
-'use client'
-import React, { useState, useTransition } from 'react'
-import CardWrapper from './CardWrapper'
-import * as z from 'zod'
-import { LoginSchema } from '@/schemas'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+"use client";
+import React, { useState, useTransition } from "react";
+import CardWrapper from "./CardWrapper";
+import * as z from "zod";
+import { LoginSchema } from "@/schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -12,40 +12,47 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '../ui/input'
-import { Button } from '../ui/button'
-import FormError from '../FormError'
-import FormSuccess from '../FormSuccess'
-import { login } from '@/actions/login'
+} from "@/components/ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import FormError from "../FormError";
+import FormSuccess from "../FormSuccess";
+import { login } from "@/actions/login";
+import { useSearchParams } from "next/navigation";
 
 const LoginForm = ({ children }: any) => {
-  const [error, setError] = useState<string|undefined>('')
-  const [success, setSuccess] = useState<string|undefined>('')
-  const [isPending, startTransition] = useTransition()
+  const searchParams = useSearchParams();
+  const urlError =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? "Email already in use with different provider"
+      : "";
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+  const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
-  })
+  });
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    setError('')
-    setSuccess('')
+    setError("");
+    setSuccess("");
     startTransition(() => {
-      login(values).then(data => {
-        setError(data.error)
-        setSuccess(data.success)
-      })
-    })
-  }
+      login(values).then((data) => {
+        setError(data?.error);
+        setSuccess(data?.success);
+      });
+    });
+  };
   return (
     <CardWrapper
       headerLabel="Welcome back"
       backButtonLabel="Don't have an account?"
       backButtonHref="/auth/register"
-      showSocial>
+      showSocial
+    >
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4">
@@ -66,7 +73,7 @@ const LoginForm = ({ children }: any) => {
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )
+                );
               }}
             />
             <FormField
@@ -77,15 +84,20 @@ const LoginForm = ({ children }: any) => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isPending} placeholder="******" type="password" />
+                      <Input
+                        {...field}
+                        disabled={isPending}
+                        placeholder="******"
+                        type="password"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )
+                );
               }}
             />
           </div>
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
             Login
@@ -93,7 +105,7 @@ const LoginForm = ({ children }: any) => {
         </form>
       </Form>
     </CardWrapper>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;
